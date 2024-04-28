@@ -1,6 +1,6 @@
 
-process.on('uncaughtException' ,(err)=>{
-    console.log("error",err);
+process.on('uncaughtException', (err) => {
+    console.log("error", err);
 })
 
 import express from 'express';
@@ -8,12 +8,23 @@ import 'dotenv/config';
 import connectMongoDb from './database/dbConnection.js';
 import { init } from './src/server.routes.js';
 import cors from 'cors'
-const app = express(); 
+import { creaateOnlinPay } from './src/order/order.controller.js';
+const app = express();
 
 
 /*middelware*/
 app.use(cors());
-app.use(express.json()); 
+
+const express = require('express');
+const app = express();
+
+
+
+app.post('/webhook', express.raw({ type: 'application/json' }), creaateOnlinPay);
+
+app.listen(4242, () => console.log('Running on port 4242'));
+
+app.use(express.json());
 app.use(express.static('uploads'))
 
 
@@ -22,10 +33,10 @@ init(app);
 /*database connection*/
 connectMongoDb();
 /*listen to server */
-const port = process.env.PORT || 3000 ;
+const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 
-process.on('unhandledRejection' ,(err)=>{
+process.on('unhandledRejection', (err) => {
     console.log(err);
 })

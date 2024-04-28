@@ -5,7 +5,7 @@ import { cartModel } from '../../database/models/cart.model.js ';
 import { productModel } from "../../database/models/proudcts.model.js";
 import { orderModel } from "../../database/models/order.model.js";
 import Stripe from 'stripe';
-const stripe = new Stripe('sk_test_51PAXkGAeuGRCbufKY3J7sBQgqspGDQZwdqxCEvFQiHIfbhh5id3EC4IKKddoZqBoddGMO31df1kikm3bHt50PKC000EfAOlfbI');
+const stripe = new Stripe('sk_test_51PAcenP2dEycsQdV8UkzRpy6MJvGmD3fV2ZTTYwsbwdaqFlHDgW2UaiJYmvjFv4gLEjuyRK0eeG0V7Xi8JJSUzPj00txJBojUE');
 
 
 export const createOrder = catchAsyncError(async (req, res, next) => {
@@ -78,3 +78,59 @@ export const createCheckoutSisson = catchAsyncError(async (req, res, next) => {
     });
     res.json({ message: 'success', session });
 })
+
+export const creaateOnlinPay = catchAsyncError(async(request, response) => {
+    const endpointSecret = "whsec_xMCv1VU0YngQbVACcG6oeCQ4axhrvpnJ";
+    const sig = request.headers['stripe-signature'].toString();
+
+    let event;
+
+    try {
+        event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+    } catch (err) {
+        response.status(400).send(`Webhook Error: ${err.message}`);
+        return;
+    }
+
+    // Handle the event
+    if(event.type == "checkout.session.completed"){
+        let e =event.data.object;
+        let cart = await cartModel.findById(e.client_reference_id);
+    let user = await userModel.findOne({email:e.customer_email});
+
+    if (cart.item[0]) {
+        let order = new orderModel({
+            user: user,
+            item: cart.item,
+            shipingAddress: e.metadata.shipingAddress,
+            totalPrice: e.amount_total /100 ,
+            paymentMethode:'card',
+            isPaid: true ,
+            paidAt:Date.now()
+        })
+        if (cart.totalPriceAfterDiscount) {
+            order.totalPrice = cart.totalPriceAfterDiscount
+        }
+        await order.save();
+        if (order) {
+            let option = cart.item.filter(item => item.quantity > 0).map((item) => ({
+                updateOne: {
+                    filter: { _id: item.product },
+                    update: { $inc: { quantity: -item.quantity, sold: item.quantity } }
+                }
+            }))
+            await productModel.bulkWrite(option);
+        }
+        await cartModel.findOneAndUpdate({ user: user._id }, { $set: { 'item': [] } }, { new: true });
+        return res.status(200).json({ message: 'success', order: order });
+    }
+    next(new AppError('cart is empty!!!', 404));
+    }else{
+        console.log(`Unhandled event type ${event.type}`);
+    }
+})
+
+
+async function card(e ,res){
+    
+}
