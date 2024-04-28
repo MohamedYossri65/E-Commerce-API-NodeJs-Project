@@ -7,12 +7,12 @@ import express from 'express';
 import 'dotenv/config';
 import connectMongoDb from './database/dbConnection.js';
 import { init } from './src/server.routes.js';
-import cros from "cros"
+import cors from 'cors'
 const app = express(); 
 
 
 /*middelware*/
-app.use(cros());
+app.use(cors());
 app.use(express.json()); 
 app.use(express.static('uploads'))
 
