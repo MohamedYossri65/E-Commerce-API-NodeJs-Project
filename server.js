@@ -9,14 +9,13 @@ import connectMongoDb from './database/dbConnection.js';
 import { init } from './src/server.routes.js';
 import cors from 'cors'
 import { creaateOnlinPay } from './src/order/order.controller.js';
-const app = express();
 
+
+const app = express();
 
 /*middelware*/
 app.use(cors());
 
-const express = require('express');
-const app = express();
 
 
 
