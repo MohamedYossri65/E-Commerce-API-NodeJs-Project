@@ -25,7 +25,6 @@ app.post('/webhook', express.raw({ type: 'application/json' }), creaateOnlinPay)
 app.listen(4242, () => console.log('Running on port 4242'));
 
 app.use(express.json());
-app.use(express.static('uploads'))
 
 
 init(app);
