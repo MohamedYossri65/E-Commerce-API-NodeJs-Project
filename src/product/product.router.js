@@ -10,7 +10,7 @@ const productRouter = express.Router({ mergeParams: true });
 
 let fieldArray = [{name :'imgCover' ,maxCount: 1} ,{name :'imgs' ,maxCount: 10}]
 
-productRouter.post('/', protectedRouts , allowedTo('admin' ,'user'), uploadMixOfFiles('product' ,fieldArray), creatProduct);
+productRouter.post('/', protectedRouts , allowedTo('admin'), uploadMixOfFiles('product' ,fieldArray) ,validation(createProductSchema), creatProduct);
 productRouter.get('/', getAllProduct);
 productRouter.get('/:id', getProduct);
 productRouter.put('/:id', allowedTo('admin'),uploadMixOfFiles('product' ,fieldArray),  updateProduct);

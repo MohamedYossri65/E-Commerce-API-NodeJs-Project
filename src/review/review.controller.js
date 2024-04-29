@@ -34,7 +34,6 @@ export const updateReview = catchAsyncError(async (req, res, next) => {
         _id: id,
         user: req.user._id
     }, req.body, { new: true });
-    // let result = await reviewModel.findByIdAndUpdate(id, req.body, { new: true });
     !result && next(new AppError(`review not found or you are not authorized to do this action`, 404));
     result && res.status(200).json({ message: 'success', result });
 })

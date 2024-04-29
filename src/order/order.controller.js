@@ -10,12 +10,11 @@ const stripe = new Stripe('sk_test_51PAcenP2dEycsQdV8UkzRpy6MJvGmD3fV2ZTTYwsbwda
 
 export const createOrder = catchAsyncError(async (req, res, next) => {
     let cart = await cartModel.findOne({ user: req.user._id });
-
     if (cart.item[0]) {
         let order = new orderModel({
             user: req.user._id,
             item: cart.item,
-            shipingAddress: req.body.shipingAddress,
+            shipingAddress: req.body,
             totalPrice: cart.totalPrice
         })
         if (cart.totalPriceAfterDiscount) {
