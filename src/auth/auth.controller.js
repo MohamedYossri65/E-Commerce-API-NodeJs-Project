@@ -8,7 +8,7 @@ import bcrypt from 'bcrypt';
 export const signUp = catchAsyncError(async (req, res, next) => {
     let user = await userModel.findOne({ email: req.body.email })
     if (user) return next(new AppError('email already exist', 409))
-    if (req.file.filename) req.body.profilImg = req.file.filename;
+    if (req.body.profilImg) req.body.profilImg = req.file.filename;
     let result = new userModel(req.body);
     await result.save();
 
