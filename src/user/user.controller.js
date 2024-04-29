@@ -4,7 +4,6 @@ import { AppError } from "../utils/AppError.js";
 import { ApiFeaturs } from "../utils/apiFeaturs.js";
 import { userModel } from './../../database/models/user.model.js';
 
-
 export const createUser = catchAsyncError(async(req, res, next)=>{
     let user = await userModel.findOne({email :req.body.email})
     if(user) return next(new AppError('email already exist' ,409))
