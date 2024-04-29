@@ -14,6 +14,7 @@ import { creaateOnlinPay } from './src/order/order.controller.js';
 const app = express();
 
 /*middelware*/
+app.use(express.static('uploads'))
 app.use(cors());
 
 

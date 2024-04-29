@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import 'dotenv/config';
 
 const productSchema = mongoose.Schema(
   {
@@ -72,8 +73,8 @@ const productSchema = mongoose.Schema(
   { timestamps: true ,toJSON: { virtuals: true }} 
 );
 productSchema.post('init' ,(doc)=>{
-  doc.imgCover = process.env.BASE_URL +'/product/'+doc.imgCover;
-  doc.imgs = doc.imgs.map(path=>process.env.BASE_URL +'/product/'+path)
+  doc.imgCover = process.env.BASE_URL+'/product/'+doc.imgCover;
+  doc.imgs = doc.imgs.map(path=>process.env.BASE_URL+'/product/'+path)
 })
 
 productSchema.virtual('Reviews', {

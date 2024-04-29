@@ -1,6 +1,7 @@
 
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import 'dotenv/config';
 
 const userSchema = mongoose.Schema(
   {
@@ -61,9 +62,8 @@ userSchema.pre('findOneAndUpdate', function () {
   }
 })
 
-
 userSchema.post('init', (doc) => {
-  doc.profilImg = process.env.BASE_URL + '/user/' + doc.profilImg;
+  doc.profilImg = process.env.BASE_URL+'/user/'+ doc.profilImg;
 })
 
 export const userModel = mongoose.model("user", userSchema);
