@@ -23,14 +23,15 @@ const userSchema = mongoose.Schema(
       type: String,
       required: [true, "the password is requierd"],
       trim: true,
-      minLength: [8, "too short brands name"],
+      minLength: [8, "too short"],
+      maxLength: [100, "too long"]
     },
     PasswordChangeDate: Date,
     phone: {
       type: Number,
       required: [true, "the password is requierd"],
       trim: true,
-      minLength: [11, "too short brands name"],
+      minLength: [11, "too short"],
     },
     profilImg: {
       type: String,
@@ -58,6 +59,7 @@ userSchema.pre('save', function () {
 })
 userSchema.pre('findOneAndUpdate', function () {
   if (this._update.password) {
+    
     this._update.password = bcrypt.hashSync(this._update.password, 8);
   }
 })

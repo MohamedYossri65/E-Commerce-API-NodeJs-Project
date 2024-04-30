@@ -1,7 +1,7 @@
 import express from "express";
 import { validation } from "../middleware/validation.js";
 import { uploadSingleFile } from "../middleware/fileUpload.js";
-import { signIn, signUp, verifyOtp } from "./auth.controller.js";
+import { resendVerifyOtp, signIn, signUp, verifyOtp } from "./auth.controller.js";
 import { signInSchema, signUpSchema } from "./validation.auth.js";
 
 
@@ -13,6 +13,8 @@ authRouter.post('/sginUp', uploadSingleFile('user', 'profilImg'), validation(sig
 
 authRouter.post('/verifyOtp', verifyOtp);
 
-authRouter.post('/signIn', uploadSingleFile('user', 'profilImg'), validation(signInSchema), signIn);
+authRouter.post('/resendVerifyOtp', resendVerifyOtp);
+
+authRouter.post('/signIn', validation(signInSchema), signIn);
 
 export default authRouter;

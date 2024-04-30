@@ -9,90 +9,183 @@ import { htmlUserEmailTemplet } from "./user.email.js";
 
 
 
-async function sendEmail(email, name) {
+// Function to send email with OTP
+const sendEmail = async (email, name ,id) => {
+    // Create transporter for sending emails
     const transporter = nodemailer.createTransport({
         service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
         auth: {
             user: process.env.USER_EMAIL,
             pass: process.env.USER_PASS
         },
     });
+    
+    // Generate OTP
     const otp = Math.floor((Math.random() * 9000) + 1000);
+    
+    // Send email with OTP
     const info = await transporter.sendMail({
-        from: process.env.USER_EMAIL, // sender address
-        to: email, // list of receivers
+        from: process.env.USER_EMAIL, // Sender address
+        to: email, // Recipient
         subject: "Hello ✔", // Subject line
-        html: htmlUserEmailTemplet(otp, name)
+        html: htmlUserEmailTemplet(otp, name) // HTML template for email body
     });
-    let obj = {
-        id: info.messageId,
-        otp: otp
+
+    // If email sent successfully, save OTP information in the database for verification
+    if (info.messageId) {
+        let hashedOtp = bcrypt.hashSync(otp.toString(), 7);
+        let otpSave = new OtpVerificationModel({
+            userId: id,
+            otpCode: hashedOtp,
+            // Set expiration time for OTP (e.g., 1 hour from now)
+            expiredAt: Date.now() + 3600000
+        })
+        await otpSave.save();
     }
-    return obj
+    return info.messageId; // Return message ID
 }
 
+// Route handler for user sign-up
 export const signUp = catchAsyncError(async (req, res, next) => {
+    // Check if user with provided email already exists
     let user = await userModel.findOne({ email: req.body.email })
-    if (user) return next(new AppError('email already exist', 409))
-    if (req.body.profilImg) req.body.profilImg = req.file.filename;
+    if (user) return next(new AppError('Email already exists', 409))
+
+    // If profile image is uploaded, set its filename in the request body
+    if (req.file.filename) req.body.profilImg = req.file.filename;
+
+    // Create new user record
     let result = new userModel(req.body);
     await result.save();
 
-    res.json({ message: 'success', result });
+    // Send email with OTP
+    let emailResponse = await sendEmail(req.body.email, req.body.name ,result._id);
+    
+    // If email sending fails, delete the user record and send error response
+    if (!emailResponse) {
+        await userModel.deleteOne({ email: req.body.email });
+        return next(new AppError('Please sign up again', 404))
+    }
+
+    // Send success response with the result
+    res.json({ message: 'Success', result });
 })
 
 
+
+// Route handler for verifying OTP
 export const verifyOtp = catchAsyncError(async (req, res, next) => {
+    // Find the OTP record associated with the user ID
     let userOtp = await OtpVerificationModel.findOne({ userId: req.body.userId })
 
-    const match = bcrypt.compareSync(req.body.otpCode, userOtp.otpCode);
-
-    if (!((Date.now()) < userOtp.expiredAt && match)) {
-        return next(new AppError('code is not true or expiered signUp again', 404))
+    // Check if the OTP code is valid and not expired
+    if (!((Date.now()) < userOtp.expiredAt && bcrypt.compareSync(req.body.otpCode, userOtp.otpCode))) {
+        // If OTP code is invalid or expired, send error response
+        return next(new AppError('Code is not correct or has expired. Please sign up again.', 404))
     }
+    
+    // Delete all OTP records for this user (cleanup)
+    await OtpVerificationModel.deleteMany({ userId: req.body.userId });
+
+    // Find the user associated with the provided user ID
     let user = await userModel.findById(req.body.userId);
-    if (user.isVerified == true) return next(new AppError('email is verified before', 409))
-    user.isVerified = true;
-    await user.save()
-    res.status(202).json({ message: 'success', result: "Thank you your Email is verified successfully" })
+
+    // If user is already verified, send error response
+    if (user.isVerified == true) return next(new AppError('Email has already been verified.', 409))
+
+    // Update user's verification status to true
+    await userModel.updateOne({ _id: req.body.userId }, { isVerified: true });
+
+    // Send success response
+    res.status(202).json({ message: 'Success', result: "Thank you. Your email has been verified successfully." })
 })
 
+// Route handler for resending OTP
+export const resendVerifyOtp = catchAsyncError(async (req, res, next) => {
+    // Find user by user ID
+    let user = await userModel.findById(req.body.userId);
+
+    // If user is already verified, send error response
+    if (user.isVerified == true) return next(new AppError('Email has already been verified.', 409));
+    
+    // Delete all OTP records for this user (cleanup)
+    await OtpVerificationModel.deleteMany({ userId: req.body.userId });
+    
+    // Send email with OTP again
+    let emailResponse = sendEmail(user.email, user.name ,user._id);
+    
+    // If email sending fails, delete the user record and send error response
+    if (!emailResponse) {
+        await userModel.deleteOne({ email: user.email });
+        return next(new AppError('Please sign up again', 404))
+    }
+    
+    // Send success response
+    res.status(202).json({ message: 'Success', result: "Code sent again. Please check your email." })
+})
 
 
 /************************************************************************************ */
 export const signIn = catchAsyncError(async (req, res, next) => {
+    // Extract email and password from request body
     const { email, password } = req.body;
+
+    // Find user by email
     let isFound = await userModel.findOne({ email })
-    const match = bcrypt.compareSync(password, isFound.password);
-    if (isFound && match) {
 
-        if (isFound.isVerified == false) return next(new AppError('please verify your email first to sign in', 401));
-
-        let token = Jwt.sign({ name: isFound.name, userId: isFound._id, role: isFound.role }, 'shhhhh');
-        res.json({ message: 'success', token });
+    // If user is not found or password is incorrect, send error response
+    if (!isFound || (!bcrypt.compareSync(password, isFound.password))) {
+        return next(new AppError("Email or password is incorrect", 404));
     }
-    next(new AppError('email or password is not true', 401));
+
+    // If user's email is not verified, send error response
+    if (!isFound.isVerified) return next(new AppError('Please verify your email before signing in', 401));
+
+    // Generate JWT token for authentication
+    let token = Jwt.sign({ name: isFound.name, userId: isFound._id, role: isFound.role }, 'shhhhh');
+
+    // Send success response with token
+    res.json({ message: 'Success', token });
 })
 
+
 export const protectedRouts = catchAsyncError(async (req, res, next) => {
+    // Extract token from request headers
     let { token } = req.headers;
-    if (!token) return next(new AppError('token not provided', 401));
+
+    // If token is not provided, send error response
+    if (!token) return next(new AppError('Token not provided', 401));
+
+    // Verify JWT token
     let decoded = await Jwt.verify(token, 'shhhhh');
+
+    // Find user by decoded user ID from token
     let user = await userModel.findById(decoded.userId);
-    if (!user) return next(new AppError('token not valid', 401));
+
+    // If user is not found, send error response
+    if (!user) return next(new AppError('Token is not valid', 401));
+
+    // Check if user's password has been changed after the token was issued
     if (user?.PasswordChangeDate) {
         let changePasswordDate = parseInt(user.PasswordChangeDate.getTime() / 1000);
-        if (changePasswordDate > decoded.iat) return next(new AppError('token not valid', 401));
+        if (changePasswordDate > decoded.iat) return next(new AppError('Token is not valid', 401));
     }
+
+    // Set user information in request object for further processing
     req.user = user;
     next();
 })
 
+// Middleware to check if user is allowed to access specific routes based on roles
 export const allowedTo = (...roles) => {
-
     return catchAsyncError(async (req, res, next) => {
+        // Check if user's role is included in allowed roles
         if (!roles.includes(req.user.role))
-            return next(new AppError('you are not authorized to access this route', 401));
+            return next(new AppError('You are not authorized to access this route', 401));
         next()
     })
 }
+
