@@ -10,7 +10,7 @@ import { htmlUserEmailTemplet } from "./user.email.js";
 
 
 // Function to send email with OTP
-const sendEmail = async (email, name ,id) => {
+const sendEmail = async (email, name, id) => {
     // Create transporter for sending emails
     const transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -22,10 +22,10 @@ const sendEmail = async (email, name ,id) => {
             pass: process.env.USER_PASS
         },
     });
-    
+
     // Generate OTP
     const otp = Math.floor((Math.random() * 9000) + 1000);
-    
+
     // Send email with OTP
     const info = await transporter.sendMail({
         from: process.env.USER_EMAIL, // Sender address
@@ -62,8 +62,8 @@ export const signUp = catchAsyncError(async (req, res, next) => {
     await result.save();
 
     // Send email with OTP
-    let emailResponse = await sendEmail(req.body.email, req.body.name ,result._id);
-    
+    let emailResponse = await sendEmail(req.body.email, req.body.name, result._id);
+
     // If email sending fails, delete the user record and send error response
     if (!emailResponse) {
         await userModel.deleteOne({ email: req.body.email });
@@ -86,7 +86,7 @@ export const verifyOtp = catchAsyncError(async (req, res, next) => {
         // If OTP code is invalid or expired, send error response
         return next(new AppError('Code is not correct or has expired. Please sign up again.', 404))
     }
-    
+
     // Delete all OTP records for this user (cleanup)
     await OtpVerificationModel.deleteMany({ userId: req.body.userId });
 
@@ -110,19 +110,19 @@ export const resendVerifyOtp = catchAsyncError(async (req, res, next) => {
 
     // If user is already verified, send error response
     if (user.isVerified == true) return next(new AppError('Email has already been verified.', 409));
-    
+
     // Delete all OTP records for this user (cleanup)
     await OtpVerificationModel.deleteMany({ userId: req.body.userId });
-    
+
     // Send email with OTP again
-    let emailResponse = sendEmail(user.email, user.name ,user._id);
-    
+    let emailResponse = sendEmail(user.email, user.name, user._id);
+
     // If email sending fails, delete the user record and send error response
     if (!emailResponse) {
         await userModel.deleteOne({ email: user.email });
         return next(new AppError('Please sign up again', 404))
     }
-    
+
     // Send success response
     res.status(202).json({ message: 'Success', result: "Code sent again. Please check your email." })
 })
@@ -148,7 +148,58 @@ export const signIn = catchAsyncError(async (req, res, next) => {
     let token = Jwt.sign({ name: isFound.name, userId: isFound._id, role: isFound.role }, 'shhhhh');
 
     // Send success response with token
-    res.json({ message: 'Success', token });
+    res.status(200).json({ message: 'Success', token });
+})
+
+
+
+export const forgetPassword = catchAsyncError(async (req, res, next) => {
+    // Extract email and password from request body
+    const { email } = req.body;
+
+    // Find user by email
+    let isFound = await userModel.findOne({ email })
+
+    // If user is not found , send error response
+    if (!isFound) {
+        return next(new AppError("Email is incorrect", 404));
+    }
+
+    // Send email with OTP
+    let emailResponse = await sendEmail(isFound.email, isFound.name, isFound._id);
+
+    // If email sending fails, delete the user record and send error response
+    if (!emailResponse) {
+        return next(new AppError('Please try again', 404))
+    }
+    // Send success response
+    res.status(200).json({ message: 'Success' ,userId: isFound._id});
+})
+
+export const resetPassword = catchAsyncError(async (req, res, next) => {
+    // Extract email and password from request body
+    const { newPassword ,otpCode} = req.body;
+    // Find the OTP record associated with the user ID
+    let userOtp = await OtpVerificationModel.findOne({ userId: req.params.userId })
+
+    // Check if the OTP code is valid and not expired
+    if (!((Date.now()) < userOtp.expiredAt && bcrypt.compareSync(otpCode, userOtp.otpCode))) {
+        // If OTP code is invalid or expired, send error response
+        return next(new AppError('Code is not correct or has expired. Please try again.', 404))
+    }
+
+    // Delete all OTP records for this user (cleanup)
+    await OtpVerificationModel.deleteMany({ userId: req.params.userId });
+
+    // Find the user associated with the provided user ID
+    let user = await userModel.findById(req.params.userId);
+
+    // Update user's verification status to true
+    await userModel.findOneAndUpdate({ _id: req.params.userId }, { password: newPassword });
+
+    // Send success response
+    res.status(202).json({ message: 'Success', result: "Thank you. Your password is reset." })
+
 })
 
 
