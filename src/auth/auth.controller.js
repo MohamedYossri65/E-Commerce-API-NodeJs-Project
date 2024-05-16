@@ -153,14 +153,15 @@ export const signIn = catchAsyncError(async (req, res, next) => {
 
 
 
+// Function to initiate the forgot password process
 export const forgetPassword = catchAsyncError(async (req, res, next) => {
-    // Extract email and password from request body
+    // Extract email from request body
     const { email } = req.body;
 
     // Find user by email
     let isFound = await userModel.findOne({ email })
 
-    // If user is not found , send error response
+    // If user is not found, send error response
     if (!isFound) {
         return next(new AppError("Email is incorrect", 404));
     }
@@ -176,9 +177,11 @@ export const forgetPassword = catchAsyncError(async (req, res, next) => {
     res.status(200).json({ message: 'Success' ,userId: isFound._id});
 })
 
+// Function to reset the user's password
 export const resetPassword = catchAsyncError(async (req, res, next) => {
-    // Extract email and password from request body
+    // Extract new password and OTP code from request body
     const { newPassword ,otpCode} = req.body;
+    
     // Find the OTP record associated with the user ID
     let userOtp = await OtpVerificationModel.findOne({ userId: req.params.userId })
 
@@ -194,7 +197,7 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
     // Find the user associated with the provided user ID
     let user = await userModel.findById(req.params.userId);
 
-    // Update user's verification status to true
+    // Update user's password
     await userModel.findOneAndUpdate({ _id: req.params.userId }, { password: newPassword });
 
     // Send success response
