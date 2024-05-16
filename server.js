@@ -9,6 +9,7 @@ import connectMongoDb from './database/dbConnection.js';
 import { init } from './src/server.routes.js';
 import cors from 'cors'
 import { creaateOnlinPay } from './src/order/order.controller.js';
+import { limiter } from './src/middleware/rateLimit.js';
 
 
 const app = express();
@@ -17,6 +18,8 @@ const app = express();
 
 app.use(cors());
 
+// Apply the rate limiting middleware to all requests.
+app.use(limiter)
 
 
 
