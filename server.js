@@ -15,7 +15,7 @@ import { limiter } from './src/middleware/rateLimit.js';
 const app = express();
 
 /*middelware*/
-
+app.use(express.static(uploads));
 app.use(cors());
 
 // Apply the rate limiting middleware to all requests.
