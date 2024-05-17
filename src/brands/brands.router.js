@@ -10,10 +10,10 @@ const brandRouter = express.Router();
 
 // brandRouter.use('/:brandId/subCategories' ,brandRouter);
 
-brandRouter.post('/' ,protectedRouts,allowedTo('admin'),uploadSingleFile('brand' ,'img'), validation(createBrandSchema),createBrand);
+brandRouter.post('/' ,protectedRouts,allowedTo('admin'),uploadSingleFile('brand' ,'logo'), validation(createBrandSchema),createBrand);
 brandRouter.get('/'  ,getAllBrands);
 brandRouter.get('/:id' ,validation(getBrandsSchema) ,getBrand);
-brandRouter.put('/:id' ,allowedTo('admin'),uploadSingleFile('brand' ,'img') ,validation(updateBrandsSchema),updateBrand);
+brandRouter.put('/:id' ,allowedTo('admin'),uploadSingleFile('brand' ,'logo') ,validation(updateBrandsSchema),updateBrand);
 brandRouter.delete('/:id' ,allowedTo('admin'),validation(getBrandsSchema),deleteBrand);
 
 export default brandRouter;

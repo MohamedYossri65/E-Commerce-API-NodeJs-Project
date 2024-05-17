@@ -82,7 +82,7 @@ export const verifyOtp = catchAsyncError(async (req, res, next) => {
     let userOtp = await OtpVerificationModel.findOne({ userId: req.body.userId })
 
     // Check if the OTP code is valid and not expired
-    if (!((Date.now()) < userOtp.expiredAt && bcrypt.compareSync(req.body.otpCode, userOtp.otpCode))) {
+    if (!((Date.now()) < userOtp?.expiredAt && bcrypt.compareSync(req.body.otpCode, userOtp.otpCode))) {
         // If OTP code is invalid or expired, send error response
         return next(new AppError('Code is not correct or has expired. Please sign up again.', 404))
     }
@@ -186,7 +186,7 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
     let userOtp = await OtpVerificationModel.findOne({ userId: req.params.userId })
 
     // Check if the OTP code is valid and not expired
-    if (!((Date.now()) < userOtp.expiredAt && bcrypt.compareSync(otpCode, userOtp.otpCode))) {
+    if (!((Date.now()) < userOtp?.expiredAt && bcrypt.compareSync(otpCode, userOtp.otpCode))) {
         // If OTP code is invalid or expired, send error response
         return next(new AppError('Code is not correct or has expired. Please try again.', 404))
     }

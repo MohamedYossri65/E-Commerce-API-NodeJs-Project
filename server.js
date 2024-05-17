@@ -20,6 +20,7 @@ app.use(cors());
 
 // Apply the rate limiting middleware to all requests.
 app.use(limiter)
+app.use(express.urlencoded({ extended: true }));
 
 
 
