@@ -13,9 +13,25 @@ import subCategoryRouter from "./subCategory/subCategory.router.js";
 import userRouter from "./user/user.router.js";
 import { AppError } from "./utils/AppError.js";
 import whishlistRouter from "./whishlist/wishlist.router.js";
+import passport from 'passport';
+import { authGoogle } from './utils/passport.js'
+import cookieSession from "cookie-session";
+
 
 
 export const init = (app) => {
+
+    app.use(
+        cookieSession({
+            name: "session",
+            keys: ["somesessionkey"],
+            maxAge: 24 * 60 * 60 * 100,
+        })
+    );
+    app.use(passport.initialize());
+    app.use(passport.session());
+    authGoogle(passport)
+
     app.use('/api/v1/categories', categoryRouter);
     app.use('/api/v1/subCategories', subCategoryRouter);
     app.use('/api/v1/brands', brandRouter);
@@ -29,6 +45,7 @@ export const init = (app) => {
     app.use('/api/v1/cart', cartRouter);
     app.use('/api/v1/order', orderRouter);
     /*----------------------------------- */
+
 
     /*routs*/
 

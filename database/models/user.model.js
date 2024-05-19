@@ -21,7 +21,6 @@ const userSchema = mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, "the password is requierd"],
       trim: true,
       minLength: [8, "too short"],
       maxLength: [100, "too long"]
@@ -29,7 +28,6 @@ const userSchema = mongoose.Schema(
     PasswordChangeDate: Date,
     phone: {
       type: Number,
-      required: [true, "the password is requierd"],
       trim: true,
       minLength: [11, "too short"],
     },
@@ -50,6 +48,7 @@ const userSchema = mongoose.Schema(
       city: String,
       phone: String,
     }],
+    googleId:String
   },
   { timestamps: true }
 );

@@ -9,6 +9,7 @@ import { htmlUserEmailTemplet } from "./user.email.js";
 
 
 
+
 // Function to send email with OTP
 const sendEmail = async (email, name, id) => {
     // Create transporter for sending emails
@@ -145,7 +146,7 @@ export const signIn = catchAsyncError(async (req, res, next) => {
     if (!isFound.isVerified) return next(new AppError('Please verify your email before signing in', 401));
 
     // Generate JWT token for authentication
-    let token = Jwt.sign({ name: isFound.name, userId: isFound._id, role: isFound.role }, 'shhhhh');
+    let token = Jwt.sign({ name: isFound.name, userId: isFound._id, role: isFound.role }, process.env.SECRET_CODE);
 
     // Send success response with token
     res.status(200).json({ message: 'Success', token });
@@ -174,14 +175,14 @@ export const forgetPassword = catchAsyncError(async (req, res, next) => {
         return next(new AppError('Please try again', 404))
     }
     // Send success response
-    res.status(200).json({ message: 'Success' ,userId: isFound._id});
+    res.status(200).json({ message: 'Success', userId: isFound._id });
 })
 
 // Function to reset the user's password
 export const resetPassword = catchAsyncError(async (req, res, next) => {
     // Extract new password and OTP code from request body
-    const { newPassword ,otpCode} = req.body;
-    
+    const { newPassword, otpCode } = req.body;
+
     // Find the OTP record associated with the user ID
     let userOtp = await OtpVerificationModel.findOne({ userId: req.params.userId })
 
@@ -214,7 +215,7 @@ export const protectedRouts = catchAsyncError(async (req, res, next) => {
     if (!token) return next(new AppError('Token not provided', 401));
 
     // Verify JWT token
-    let decoded = await Jwt.verify(token, 'shhhhh');
+    let decoded = await Jwt.verify(token, process.env.SECRET_CODE);
 
     // Find user by decoded user ID from token
     let user = await userModel.findById(decoded.userId);
@@ -242,4 +243,28 @@ export const allowedTo = (...roles) => {
         next()
     })
 }
+
+
+
+/****************************************sign with google**************************************** */
+
+// Handler for successful login
+export const LoginStatus = catchAsyncError(async (req, res, next) => {
+    // Check if the user exists in the request object
+    if (req.user) {
+        // Create a JWT token with the user's details
+        let token = Jwt.sign({ 
+            name: req.user.name, 
+            userId: req.user._id, 
+            role: req.user.role 
+        }, process.env.SECRET_CODE); 
+
+        // Send a success response with the token
+        return res.status(200).json({ message: 'Success', token });
+    } else {
+        // If user does not exist, call the next middleware with an error
+        return next(new AppError("Email or password is incorrect", 404));
+    }
+});
+
 

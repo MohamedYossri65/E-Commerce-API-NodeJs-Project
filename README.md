@@ -107,6 +107,7 @@ This full E-Commerce API build using Express and MongoDb, and other Npm Packages
     <ul>
         <li>Node.js</li>
         <li>Express</li>
+        <li>passport js</li>
         <li>MongoDB</li>
         <li>Mongoose</li>
         <li>dotenv</li>

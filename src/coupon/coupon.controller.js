@@ -6,37 +6,73 @@ import { ApiFeaturs } from "../utils/apiFeaturs.js";
 import QRCode from "qrcode"
 
 
+
+// Controller to create a new coupon
 export const createCoupon = catchAsyncError(async (req, res, next) => {
+    // Create a new coupon instance with the request body data
     let result = new couponModel(req.body);
+    
+    // Save the coupon to the database
     await result.save();
+    
+    // Respond with success message and the created coupon
     res.json({ message: 'success', result });
-})
+});
 
+// Controller to get all coupons
 export const getAllCoupons = catchAsyncError(async (req, res, next) => {
-
+    // Initialize API features with the coupon model query and request query parameters
     let apiFeaturs = new ApiFeaturs(couponModel.find({}), req.query)
         .paginate().filter().sort().search().select();
 
+    // Execute the query with the API features
     let result = await apiFeaturs.mongooseQuery;
-    res.json({ message: 'success', page: ApiFeaturs.page, result });
-})
+    
+    // Respond with success message, current page, and the result
+    res.json({ message: 'success', page: apiFeaturs.page, result });
+});
+
+// Controller to get a single coupon by ID
 export const getCoupon = catchAsyncError(async (req, res, next) => {
     let { id } = req.params;
+    
+    // Find the coupon by ID
     let result = await couponModel.findById(id);
-    !result && next(new AppError('Coupon not found', 404));
-    let url =await QRCode.toDataURL(result.code);
-    result && res.json({ message: 'success', result ,url});
-})
+    
+    // If the coupon is not found, pass an error to the next middleware
+    if (!result) return next(new AppError('Coupon not found', 404));
+    
+    // Generate a QR code for the coupon code
+    let url = await QRCode.toDataURL(result.code);
+    
+    // Respond with success message, the coupon, and the QR code URL
+    res.json({ message: 'success', result, url });
+});
+
+// Controller to update a coupon by ID
 export const updateCoupon = catchAsyncError(async (req, res, next) => {
     let { id } = req.params;
+    
+    // Find the coupon by ID and update it with the request body data
     let result = await couponModel.findByIdAndUpdate(id, req.body, { new: true });
-    !result && next(new AppError('Coupon not found', 404));
-    result && res.json({ message: 'success', result });
-})
+    
+    // If the coupon is not found, pass an error to the next middleware
+    if (!result) return next(new AppError('Coupon not found', 404));
+    
+    // Respond with success message and the updated coupon
+    res.json({ message: 'success', result });
+});
+
+// Controller to delete a coupon by ID
 export const deleteCoupon = catchAsyncError(async (req, res, next) => {
     let { id } = req.params;
+    
+    // Find the coupon by ID and delete it
     let result = await couponModel.findByIdAndDelete(id);
-
+    
+    // If the coupon is not found, pass an error to the next middleware
     if (!result) return next(new AppError('Coupon not found', 404));
+    
+    // Respond with success message and the deleted coupon
     res.json({ message: 'success', result });
-})
+});

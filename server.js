@@ -16,7 +16,10 @@ const app = express();
 
 /*middelware*/
 
+
+
 app.use(cors());
+app.use(express.static('uploads'));
 
 // Apply the rate limiting middleware to all requests.
 app.use(limiter)
@@ -26,7 +29,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.post('/webhook', express.raw({ type: 'application/json' }), creaateOnlinPay);
 
-app.listen(4242, () => console.log('Running on port 4242'));
 
 app.use(express.json());
 

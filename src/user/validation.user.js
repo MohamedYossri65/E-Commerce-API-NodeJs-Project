@@ -6,7 +6,7 @@ export const createUserSchema = Joi.object({
     name: Joi.string().min(2).max(20).required(),
     email: Joi.string()
         .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }),
-    phone: Joi.string().length(11).required(),
+    phone: Joi.string().length(11),
     password:Joi.string()
 })
 export const getUsersSchema = Joi.object({
