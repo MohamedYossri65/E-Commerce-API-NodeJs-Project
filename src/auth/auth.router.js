@@ -1,7 +1,7 @@
 import express from "express";
 import { validation } from "../middleware/validation.js";
 import { uploadSingleFile } from "../middleware/fileUpload.js";
-import {  faildLogin, forgetPassword, protectedRouts, resendVerifyOtp, resetPassword, signIn, signUp, successLogin, verifyOtp } from "./auth.controller.js";
+import {   LoginStatus, forgetPassword, protectedRouts, resendVerifyOtp, resetPassword, signIn, signUp, verifyOtp } from "./auth.controller.js";
 import { signInSchema, signUpSchema } from "./validation.auth.js";
 import passport from "passport";
 
