@@ -15,7 +15,7 @@ import { limiter } from './src/middleware/rateLimit.js';
 const app = express();
 
 /*middelware*/
-app.use(express.static("uploads"));
+
 
 app.use(cors());
 app.use(express.static('uploads'));
