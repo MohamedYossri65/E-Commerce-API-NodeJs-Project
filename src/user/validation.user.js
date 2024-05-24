@@ -7,11 +7,11 @@ export const createUserSchema = Joi.object({
     email: Joi.string()
         .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }),
     phone: Joi.string().length(11),
-    password:Joi.string()
+    password:Joi.string().required()
 })
 export const getUsersSchema = Joi.object({
     id: Joi.string().length(24).hex().required(),
-    password:Joi.string()
+    password:Joi.string().required()
 })
 export const updateUsersSchema = Joi.object({
     id: Joi.string().length(24).hex().required(),

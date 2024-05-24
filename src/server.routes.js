@@ -13,23 +13,16 @@ import subCategoryRouter from "./subCategory/subCategory.router.js";
 import userRouter from "./user/user.router.js";
 import { AppError } from "./utils/AppError.js";
 import whishlistRouter from "./whishlist/wishlist.router.js";
-import passport from 'passport';
-import { authGoogle } from './utils/passport.js'
-import cookieSession from "cookie-session";
 
+import { authGoogle } from './utils/passport.js'
+import passport from "passport";
 
 
 export const init = (app) => {
 
-    app.use(
-        cookieSession({
-            name: "session",
-            keys: ["somesessionkey"],
-            maxAge: 24 * 60 * 60 * 100,
-        })
-    );
+
     app.use(passport.initialize());
-    app.use(passport.session());
+
     authGoogle(passport)
 
     app.use('/api/v1/categories', categoryRouter);

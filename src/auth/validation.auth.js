@@ -6,7 +6,8 @@ export const signUpSchema = Joi.object({
     email: Joi.string()
         .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }).required(),
     phone: Joi.string().length(11),
-    password: Joi.string().length(8),
+    password: Joi.string().min(8).required(),
+    confirmPassword: Joi.string().min(8).required(),
     googleId: Joi.string().length(21),
     role: Joi.string()
 })

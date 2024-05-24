@@ -58,6 +58,8 @@ export const signUp = catchAsyncError(async (req, res, next) => {
     // If profile image is uploaded, set its filename in the request body
     if (req.file.filename) req.body.profilImg = req.file.filename;
 
+    //check if password and confirm password are the same or not 
+    if (req.body.confirmPassword != req.body.password) return next(new AppError('password confirm not match', 406))
     // Create new user record
     let result = new userModel(req.body);
     await result.save();
@@ -199,7 +201,7 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
     let user = await userModel.findById(req.params.userId);
 
     // Update user's password
-    await userModel.findOneAndUpdate({ _id: req.params.userId }, { password: newPassword });
+    await userModel.findOneAndUpdate({ _id: req.params.userId }, { password: newPassword, PasswordChangeDate: Date.now() });
 
     // Send success response
     res.status(202).json({ message: 'Success', result: "Thank you. Your password is reset." })
@@ -248,23 +250,15 @@ export const allowedTo = (...roles) => {
 
 /****************************************sign with google**************************************** */
 
-// Handler for successful login
-export const LoginStatus = catchAsyncError(async (req, res, next) => {
-    // Check if the user exists in the request object
-    if (req.user) {
-        // Create a JWT token with the user's details
-        let token = Jwt.sign({ 
-            name: req.user.name, 
-            userId: req.user._id, 
-            role: req.user.role 
-        }, process.env.SECRET_CODE); 
 
-        // Send a success response with the token
-        return res.status(200).json({ message: 'Success', token });
+export const handleGoogleLogin = catchAsyncError(async(req, res ,next) => {
+    // Assuming your strategy attaches the JWT to the user object
+    if (req.user && req.user.token) {
+        // Redirect the user or send the token directly
+        // Example: Redirect with the token in query params
+        res.redirect(`/your-success-page?token=${req.user.token}`); 
     } else {
-        // If user does not exist, call the next middleware with an error
-        return next(new AppError("Email or password is incorrect", 404));
+        res.redirect('/login?error=authenticationFailed');
     }
-});
-
+})
 
