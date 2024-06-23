@@ -23,9 +23,9 @@ authRouter.post('/forgetPassword', forgotPasswordLimiter, protectedRouts, forget
 
 authRouter.post('/resetPassword/:userId', protectedRouts, resetPassword);
 
-authRouter.post('/your-success-page?token=${token}' ,(req ,res)=>{res.json({message:'success login'})});
+authRouter.get('/google/your-success-page/:token' ,(req ,res)=>{res.json({message:'success login'})});
 
-authRouter.post('/login?error=authenticationFailed' ,(req ,res)=>{res.json({message:'failed to login'})});
+authRouter.get('/google/login?error=authenticationFailed' ,(req ,res)=>{res.json({message:'failed to login'})});
 
 /****************************************sign with google**************************************** */
 
