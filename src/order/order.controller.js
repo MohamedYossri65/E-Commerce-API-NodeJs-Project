@@ -15,43 +15,43 @@ export const createOrder = catchAsyncError(async (req, res, next) => {
     let cart = await cartModel.findOne({ user: req.user._id });
 
     // Check if the cart has items
-    if (cart.item[0]) {
-        // Create a new order with cart items and shipping address
-        let order = new orderModel({
-            user: req.user._id,
-            item: cart.item,
-            shipingAddress: req.body,
-            totalPrice: cart.totalPrice
-        });
+    if (!cart.item) {
+        // If cart is empty, pass an error to the next middleware
+        return next(new AppError('cart is empty!!!', 404));
+    }
+    // Create a new order with cart items and shipping address
+    let order = new orderModel({
+        user: req.user._id,
+        item: cart.item,
+        shipingAddress: req.body,
+        totalPrice: cart.totalPrice
+    });
 
-        // Adjust total price if there's a discount
-        if (cart.totalPriceAfterDiscount) {
-            order.totalPrice = cart.totalPriceAfterDiscount;
-        }
-
-        // Save the order to the database
-        await order.save();
-
-        // Update product quantities and sold counts in bulk
-        if (order) {
-            let option = cart.item.filter(item => item.quantity > 0).map((item) => ({
-                updateOne: {
-                    filter: { _id: item.product },
-                    update: { $inc: { quantity: -item.quantity, sold: item.quantity } }
-                }
-            }));
-            await productModel.bulkWrite(option);
-        }
-
-        // Clear the cart items
-        await cartModel.findOneAndUpdate({ user: req.user._id }, { $set: { 'item': [] } }, { new: true });
-
-        // Respond with success message and the created order
-        return res.status(200).json({ message: 'success', order: order });
+    // Adjust total price if there's a discount
+    if (cart.totalPriceAfterDiscount) {
+        order.totalPrice = cart.totalPriceAfterDiscount;
     }
 
-    // If cart is empty, pass an error to the next middleware
-    next(new AppError('cart is empty!!!', 404));
+    // Save the order to the database
+    await order.save();
+
+    // Update product quantities and sold counts in bulk
+    if (order) {
+        let option = cart.item.filter(item => item.quantity > 0).map((item) => ({
+            updateOne: {
+                filter: { _id: item.product },
+                update: { $inc: { quantity: -item.quantity, sold: item.quantity } }
+            }
+        }));
+        await productModel.bulkWrite(option);
+    }
+
+    // Clear the cart items
+    await cartModel.findOneAndUpdate({ user: req.user._id }, { $set: { 'item': [] } ,totalPrice : 0 }, { new: true });
+
+    // Respond with success message and the created order
+    return res.status(200).json({ message: 'success', order: order });
+
 });
 
 // Controller to get all orders of the logged-in user

@@ -56,18 +56,22 @@ export const deleteProductFromCart = catchAsyncError(async (req, res, next) => {
     calcTotalPrice(result)
     res.status(200).json({ message: 'success', result });
 });
+
 export const updateQuantity = catchAsyncError(async (req, res, next) => {
     let product = await productModel.findOne({ _id: req.body.product });
     if (!product) return next(new AppError('product not found', 404));
 
     let isCartExist = await cartModel.findOne({ user: req.user._id });
+
     let itemFound = await isCartExist.item.find((elem) => elem.product == req.body.product);
+
     if (itemFound && product.quantity >= req.body.quantity) {
         itemFound.quantity = req.body.quantity;
     } else {
         return next(new AppError('item not found or product not in stoke', 404));
     }
     calcTotalPrice(isCartExist);
+
     await isCartExist.save();
     res.status(201).json({ message: 'success', cart: isCartExist });
 });

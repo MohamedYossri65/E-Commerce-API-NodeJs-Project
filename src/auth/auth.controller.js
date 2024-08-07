@@ -241,7 +241,7 @@ export const allowedTo = (...roles) => {
     return catchAsyncError(async (req, res, next) => {
         // Check if user's role is included in allowed roles
         if (!roles.includes(req.user.role))
-            return next(new AppError('You are not authorized to access this route', 401));
+            return next(new AppError('You are not authorized to access this route', 403));
         next()
     })
 }

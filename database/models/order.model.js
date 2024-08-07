@@ -13,7 +13,7 @@ const orderSchema = mongoose.Schema(
                 quantity: {
                     type: Number,
                     default: 1,
-                },
+                }
             }
         ],
         totalPrice:Number,
