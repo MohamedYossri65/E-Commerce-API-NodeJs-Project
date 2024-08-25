@@ -17,7 +17,11 @@ export const createOne = (model, document) => {
         let result = new model(req.body);
         await result.save();
 
-        res.json({ message: 'success', result });
+        res.status(200).json({
+            status: 'success',
+            message: `${document} created successfully`,
+            data: result
+        });
     })
 }
 export const getAll = (model) => {
@@ -27,7 +31,14 @@ export const getAll = (model) => {
             .paginate().filter().sort().search().select();
 
         let result = await apiFeaturs.mongooseQuery;
-        res.json({ message: 'success', page: ApiFeaturs.page, result });
+
+        res.status(200).json({
+            status: 'success',
+            page: ApiFeaturs.page,
+            result: result.length,
+            message: `documents founded successfully`,
+            data: result
+        });
     })
 }
 export const getOne = (model, document) => {
@@ -35,7 +46,11 @@ export const getOne = (model, document) => {
         let { id } = req.params;
         let result = await model.findById(id);
         !result && next(new AppError(`${document} not found`, 404));
-        result && res.json({ message: 'success', result });
+        result && res.status(200).json({
+            status: 'success',
+            message: `${document} founded successfully`,
+            data: result
+        });
     })
 }
 export const updateOne = (model, document) => {
@@ -49,7 +64,11 @@ export const updateOne = (model, document) => {
         req.body.slug = slugify(req.body.name);
         let result = await model.findByIdAndUpdate(id, req.body, { new: true });
         !result && next(new AppError(`${document} not found`, 404));
-        result && res.json({ message: 'success', result });
+        result && res.status(200).json({
+            status: 'success',
+            message: `${document} updated successfully`,
+            data: result
+        });
     })
 }
 export const deleteOne = (model, document) => {
@@ -58,6 +77,10 @@ export const deleteOne = (model, document) => {
         let result = await model.findByIdAndDelete(id);
 
         if (!result) return next(new AppError(`${document} not found`, 404));
-        res.json({ message: 'success', result });
+        res.status(200).json({
+            status: 'success',
+            message: `${document} deleted successfully`,
+            data: result
+        });
     })
 }

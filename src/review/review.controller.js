@@ -14,7 +14,11 @@ export const createReview = catchAsyncError(async (req, res, next) => {
     let result = new reviewModel(req.body);
 
     await result.save();
-    res.json({ message: 'success', result });
+    res.status(200).json({
+        status: 'success',
+        message: 'review created successfully',
+        data: result
+    });
 })
 
 export const getAllReviews = catchAsyncError(async (req, res, next) => {
@@ -23,7 +27,13 @@ export const getAllReviews = catchAsyncError(async (req, res, next) => {
         .paginate().filter().sort().search().select();
 
     let result = await apiFeaturs.mongooseQuery;
-    res.json({ message: 'success', page: ApiFeaturs.page, result });
+    res.status(200).json({
+        status: 'success',
+        page: ApiFeaturs.page,
+        result: result.length,
+        message: 'reviews founded successfully',
+        data: result
+    });
 })
 
 export const getReview = factor.getOne(reviewModel, 'review');
@@ -35,7 +45,11 @@ export const updateReview = catchAsyncError(async (req, res, next) => {
         user: req.user._id
     }, req.body, { new: true });
     !result && next(new AppError(`review not found or you are not authorized to do this action`, 404));
-    result && res.status(200).json({ message: 'success', result });
+    result && res.status(200).json({
+        status: 'success',
+        message: 'reviews updated successfully',
+        data: result
+    });
 })
 
 export const deleteReview = factor.deleteOne(reviewModel, 'review');

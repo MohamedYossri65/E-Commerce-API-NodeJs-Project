@@ -1,6 +1,6 @@
 
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import 'dotenv/config';
 
 const userSchema = mongoose.Schema(
@@ -22,7 +22,6 @@ const userSchema = mongoose.Schema(
     password: {
       type: String,
       trim: true,
-      require:[true, "the password is requierd"],
       minLength: [8, "too short"],
       maxLength: [100, "too long"]
     },
@@ -49,23 +48,28 @@ const userSchema = mongoose.Schema(
       city: String,
       phone: String,
     }],
-    googleId:String
+    googleId: String
   },
   { timestamps: true }
 );
 
-userSchema.pre('save', function () {
-  this.password = bcrypt.hashSync(this.password, 8);
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
+  this.password = await bcrypt.hash(this.password, 8);
 })
-userSchema.pre('findOneAndUpdate', function () {
+userSchema.pre('findOneAndUpdate', async function () {
   if (this._update.password) {
-    
-    this._update.password = bcrypt.hashSync(this._update.password, 8);
+
+    this._update.password = await bcrypt.hash(this._update.password, 8);
   }
 })
+userSchema.methods.correctPassword = function (candidatePassword, userPassword) {
+  // Compare the candidate password with the stored password
+  return bcrypt.compareSync(candidatePassword, userPassword);
+}
 
 userSchema.post('init', (doc) => {
-  doc.profilImg = process.env.BASE_URL+'/user/'+ doc.profilImg;
+  doc.profilImg = process.env.BASE_URL + '/user/' + doc.profilImg;
 })
 
 export const userModel = mongoose.model("user", userSchema);

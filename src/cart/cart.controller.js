@@ -41,12 +41,16 @@ export const addProductToCart = catchAsyncError(async (req, res, next) => {
         } else {
             await isCartExist.item.push(req.body);
         }
-    }else{
+    } else {
         return next(new AppError('item not found or product not in stoke', 404));
     }
     calcTotalPrice(isCartExist);
     await isCartExist.save();
-    res.status(201).json({ message: 'success', cart: isCartExist });
+    res.status(201).json({
+        status: 'success',
+        message: 'product added successfully to cart',
+        data: isCartExist
+    });
 })
 
 export const deleteProductFromCart = catchAsyncError(async (req, res, next) => {
@@ -54,7 +58,11 @@ export const deleteProductFromCart = catchAsyncError(async (req, res, next) => {
 
     if (!result) return next(new AppError(`item not found in cart`, 404));
     calcTotalPrice(result)
-    res.status(200).json({ message: 'success', result });
+    res.status(200).json({
+        status: 'success',
+        message: 'product deleted successfully from cart',
+        data: result
+    });
 });
 
 export const updateQuantity = catchAsyncError(async (req, res, next) => {
@@ -73,7 +81,11 @@ export const updateQuantity = catchAsyncError(async (req, res, next) => {
     calcTotalPrice(isCartExist);
 
     await isCartExist.save();
-    res.status(201).json({ message: 'success', cart: isCartExist });
+    res.status(201).json({
+        status: 'success',
+        message: 'Product quantity updated successfully',
+        data: isCartExist
+    });
 });
 
 export const applyCoupon = catchAsyncError(async (req, res, next) => {
@@ -83,11 +95,19 @@ export const applyCoupon = catchAsyncError(async (req, res, next) => {
     cart.totalPriceAfterDiscount = cart.totalPrice - ((cart.totalPrice * coupon.discount) / 100);
 
     await cart.save();
-    res.status(200).json({ message: 'success', cart });
+    res.status(200).json({
+        status: 'success',
+        message: 'coupon applied successfully',
+        data: cart
+    });
 });
 
 export const getLoggedUserCart = catchAsyncError(async (req, res, next) => {
     let cartItems = await cartModel.findOne({ user: req.user._id }).populate('item.product');
 
-    res.status(200).json({ message: 'success', cart: cartItems });
+    res.status(200).json({
+        status: 'success',
+        message: 'cart founded successfully',
+        data: cartItems
+    });
 });

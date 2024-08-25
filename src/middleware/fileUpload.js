@@ -21,11 +21,13 @@ let option = (fileName) => {
     }
     return multer({ storage, fileFilter })
 }
-export const uploadSingleFile = (fileName, fieldName) => {
+const uploadSingleFile = (fileName, fieldName) => {
 
     return option(fileName).single(fieldName);
 }
-export const uploadMixOfFiles = (fileName, arrayOfFields) => {
+const uploadMixOfFiles = (fileName, arrayOfFields) => {
 
     return option(fileName).fields(arrayOfFields)
 }
+
+export { uploadSingleFile, uploadMixOfFiles }

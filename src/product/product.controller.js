@@ -20,7 +20,11 @@ export const creatProduct = catchAsyncError(async (req, res, next) => {
     await result.save();
 
     // Respond with success message and the created product
-    res.json({ message: 'success', result });
+    res.status(200).json({
+        status: 'success',
+        message: 'Product created successfully',
+        data: result
+    });
 });
 
 // Controller to get all products with various features (pagination, filtering, sorting, etc.)
@@ -33,7 +37,13 @@ export const getAllProduct = catchAsyncError(async (req, res, next) => {
     let result = await apiFeaturs.mongooseQuery;
 
     // Respond with success message, current page, and the result
-    res.status(200).json({ message: 'success', page: apiFeaturs.page, result });
+    res.status(200).json({
+        status: 'success',
+        page: apiFeaturs.page,
+        result: result.length,
+        message: 'Products founded successfully',
+        data: result
+    });
 });
 
 // Controller to get a single product by ID
@@ -45,7 +55,11 @@ export const getProduct = catchAsyncError(async (req, res, next) => {
     if (!result) return next(new AppError('product not found', 404));
 
     // If product found, respond with success message and the product
-    res.status(200).json({ message: 'success', result });
+    res.status(200).json({
+        status: 'success',
+        message: 'Product founded successfully',
+        data: result
+    });
 });
 
 // Controller to update a product by ID
@@ -66,7 +80,11 @@ export const updateProduct = catchAsyncError(async (req, res, next) => {
     if (!result) return next(new AppError('product not found', 404));
 
     // If product found and updated, respond with success message and the updated product
-    res.status(200).json({ message: 'success', result });
+    res.status(200).json({
+        status: 'success',
+        message: 'Product updated successfully',
+        data: result
+    });
 });
 
 // Controller to delete a product by ID
@@ -78,5 +96,9 @@ export const deleteProduct = catchAsyncError(async (req, res, next) => {
     if (!result) return next(new AppError('product not found', 404));
 
     // If product found and deleted, respond with success message and the deleted product
-    res.status(200).json({ message: 'success', result });
+    res.status(200).json({
+        status: 'success',
+        message: 'Product deleted successfully',
+        data: result
+    });
 });

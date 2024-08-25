@@ -47,11 +47,14 @@ export const createOrder = catchAsyncError(async (req, res, next) => {
     }
 
     // Clear the cart items
-    await cartModel.findOneAndUpdate({ user: req.user._id }, { $set: { 'item': [] } ,totalPrice : 0 }, { new: true });
+    await cartModel.findOneAndUpdate({ user: req.user._id }, { $set: { 'item': [] }, totalPrice: 0 }, { new: true });
 
     // Respond with success message and the created order
-    return res.status(200).json({ message: 'success', order: order });
-
+    res.status(200).json({
+        status: 'success',
+        message: 'order created successfully',
+        data: order
+    });
 });
 
 // Controller to get all orders of the logged-in user
@@ -63,7 +66,11 @@ export const getUserOrder = catchAsyncError(async (req, res, next) => {
     if (!userOrder) return next(new AppError('this user does not create any order before', 404));
 
     // Respond with success message and the user's orders
-    res.status(200).json({ message: 'success', userOrder });
+    res.status(200).json({
+        status: 'success',
+        message: 'orders founded successfully',
+        data: userOrder
+    });
 });
 
 // Controller to get all orders
@@ -75,7 +82,11 @@ export const getAllOrders = catchAsyncError(async (req, res, next) => {
     if (!orders) return next(new AppError('orders not found!!', 404));
 
     // Respond with success message and the orders
-    res.status(200).json({ message: 'success', orders });
+    res.status(200).json({
+        status: 'success',
+        message: 'orders founded successfully',
+        data: orders
+    });
 });
 
 // Controller to create a Stripe checkout session
@@ -112,7 +123,11 @@ export const createCheckoutSisson = catchAsyncError(async (req, res, next) => {
     });
 
     // Respond with success message and the session
-    res.json({ message: 'success', session });
+    res.status(200).json({
+        status: 'success',
+        message: 'session created successfully',
+        data: session
+    });
 });
 
 // Controller to handle Stripe webhook for online payment
@@ -172,7 +187,11 @@ export const creaateOnlinPay = catchAsyncError(async (request, response) => {
             await cartModel.findOneAndUpdate({ user: user._id }, { $set: { 'item': [] } }, { new: true });
 
             // Respond with success message and the created order
-            return response.status(200).json({ message: 'success', order: order });
+            return res.status(200).json({
+                status: 'success',
+                message: 'online payment created successfully',
+                data: order
+            });
         }
 
         // If cart is empty, pass an error to the next middleware

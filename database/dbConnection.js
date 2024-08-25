@@ -1,10 +1,9 @@
-import  mongoose  from 'mongoose';
+import mongoose from 'mongoose';
 
-export default function connectMongoDb()
-{
-    mongoose.connect(`mongodb+srv://yossri:yossri@cluster0.trb5jbe.mongodb.net/eCommmrceApi`).then(()=>{
+export default function connectMongoDb() {
+    mongoose.connect(process.env.URL2).then(() => {
         console.log('MongoDB Connection Succeeded.')
     }).catch((err) => {
-            console.log('Error in DB connection: ' + err)
+        console.log('Error in DB connection: ' + err)
     });
 }
