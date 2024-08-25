@@ -2,16 +2,16 @@ import Jwt from "jsonwebtoken";
 import { userModel } from "../../database/models/user.model.js";
 import { catchAsyncError } from "../middleware/catchAsyncError.js";
 import { AppError } from "../utils/AppError.js";
-import bcrypt from 'bcryptjs';
 import nodemailer from "nodemailer"
 import { OtpVerificationModel } from "../../database/models/otpUser.model.js";
 import { htmlUserEmailTemplet } from "./user.email.js";
+import cryptography from "cryptography";
 
 
 
 
 // Function to send email with OTP
-const sendEmail = async (email, name, id) => {
+const sendEmail = async (email, name, resetTokenURL) => {
     // Create transporter for sending emails
     const transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -24,32 +24,20 @@ const sendEmail = async (email, name, id) => {
         },
     });
 
-    // Generate OTP
-    const otp = Math.floor((Math.random() * 9000) + 1000);
-
     // Send email with OTP
     const info = await transporter.sendMail({
         from: process.env.USER_EMAIL, // Sender address
         to: email, // Recipient
         subject: "Hello ✔", // Subject line
-        html: htmlUserEmailTemplet(otp, name) // HTML template for email body
+        html: htmlUserEmailTemplet(resetTokenURL) // HTML template for email body
     });
 
     // If email sent successfully, save OTP information in the database for verification
-    if (info.messageId) {
-        let otpSave = new OtpVerificationModel({
-            userId: id,
-            otpCode: otp,
-            // Set expiration time for OTP (e.g., 1 hour from now)
-            expiredAt: Date.now() + 3600000
-        })
-        await otpSave.save();
-    }
     return info.messageId; // Return message ID
 }
 
 // Route handler for user sign-up
-export const signUp = catchAsyncError(async (req, res, next) => {
+const signUp = catchAsyncError(async (req, res, next) => {
     // Check if user with provided email already exists
 
     let user = await userModel.findOne({ email: req.body.email })
@@ -62,10 +50,14 @@ export const signUp = catchAsyncError(async (req, res, next) => {
     if (req.body.confirmPassword != req.body.password) return next(new AppError('password confirm not match', 406))
     // Create new user record
     let result = new userModel(req.body);
+
+    const resetToken = result.createVerficationToken();
+
     await result.save();
+    const resetURL = `${req.protocol}://${req.get('host')}/api/v1/auth/verifyEmail/${resetToken}`;
 
     // Send email with OTP
-    let emailResponse = await sendEmail(req.body.email, req.body.name, result._id);
+    let emailResponse = await sendEmail(req.body.email, req.body.name, resetURL);
 
     // If email sending fails, delete the user record and send error response
     if (!emailResponse) {
@@ -84,30 +76,22 @@ export const signUp = catchAsyncError(async (req, res, next) => {
 
 
 // Route handler for verifying OTP
-export const verifyOtp = catchAsyncError(async (req, res, next) => {
-    // Find the OTP record associated with the user ID
-    let userOtp = await OtpVerificationModel.findOne({ userId: req.body.userId })
+const verifyEmail = catchAsyncError(async (req, res, next) => {
+    const hashedToken = cryptography.encryptSync(req.params.token);
+    const user = await userModel.findOne({
+        passwordVerificationToken: hashedToken
+        , passwordVerificationTokenExpiersAt: {
+            $gt: Date.now()
+        }
+    });
+    // If user not found or expired, send error response
+    if (!user) return next(new AppError('Invalid token or expired token', 401));
 
-    const date = new Date().getTime();
-    const dateOtp = new Date(userOtp?.expiredAt).getTime();
-    // Check if the OTP code is valid and not expired
-    if (date < dateOtp || req.body.otpCode !== userOtp.otpCode.toString()) {
-        // If OTP code is invalid or expired, send error response
-        return next(new AppError('Code is not correct or has expired. Please sign up again.', 404))
-    }
-
-    // Delete all OTP records for this user (cleanup)
-    await OtpVerificationModel.deleteMany({ userId: req.body.userId });
-
-    // Find the user associated with the provided user ID
-    let user = await userModel.findById(req.body.userId);
-
-    // If user is already verified, send error response
-    if (user.isVerified == true) return next(new AppError('Email has already been verified.', 409))
-
-    // Update user's verification status to true
-    await userModel.updateOne({ _id: req.body.userId }, { isVerified: true });
-
+    // Update user's status to verified
+    user.isVerified = true;
+    user.passwordVerificationToken = undefined;
+    user.passwordVerificationTokenExpiersAt = undefined;
+    await user.save();
     // Send success response
     res.status(200).json({
         status: 'Success',
@@ -115,36 +99,9 @@ export const verifyOtp = catchAsyncError(async (req, res, next) => {
     })
 })
 
-// Route handler for resending OTP
-export const resendVerifyOtp = catchAsyncError(async (req, res, next) => {
-    // Find user by user ID
-    let user = await userModel.findById(req.body.userId);
-
-    // If user is already verified, send error response
-    if (user.isVerified == true) return next(new AppError('Email has already been verified.', 409));
-
-    // Delete all OTP records for this user (cleanup)
-    await OtpVerificationModel.deleteMany({ userId: req.body.userId });
-
-    // Send email with OTP again
-    let emailResponse = sendEmail(user.email, user.name, user._id);
-
-    // If email sending fails, delete the user record and send error response
-    if (!emailResponse) {
-        await userModel.deleteOne({ email: user.email });
-        return next(new AppError('Please sign up again', 404))
-    }
-
-    // Send success response
-    res.status(200).json({
-        status: 'Success',
-        message: 'Code sent again. Please check your email.'
-    })
-})
-
 
 /************************************************************************************ */
-export const signIn = catchAsyncError(async (req, res, next) => {
+const signIn = catchAsyncError(async (req, res, next) => {
     // Extract email and password from request body
     const { email, password } = req.body;
 
@@ -174,7 +131,7 @@ export const signIn = catchAsyncError(async (req, res, next) => {
 
 
 // Function to initiate the forgot password process
-export const forgetPassword = catchAsyncError(async (req, res, next) => {
+const forgetPassword = catchAsyncError(async (req, res, next) => {
     // Extract email from request body
     const { email } = req.body;
 
@@ -185,9 +142,12 @@ export const forgetPassword = catchAsyncError(async (req, res, next) => {
     if (!isFound) {
         return next(new AppError("Email is incorrect", 404));
     }
+    const resetToken = isFound.createVerficationToken();
 
+    const resetURL = `${req.protocol}://${req.get('host')}/api/v1/auth/resetPassword/${resetToken}`;
+    await isFound.save();
     // Send email with OTP
-    let emailResponse = await sendEmail(isFound.email, isFound.name, isFound._id);
+    let emailResponse = await sendEmail(isFound.email, isFound.name, resetURL);
 
     // If email sending fails, delete the user record and send error response
     if (!emailResponse) {
@@ -196,35 +156,30 @@ export const forgetPassword = catchAsyncError(async (req, res, next) => {
     // Send success response
     res.status(200).json({
         status: 'success',
-        message: 'Otp sent to email!',
+        message: 'email sent successfully',
         data: isFound
     });
 })
 
 // Function to reset the user's password
-export const resetPassword = catchAsyncError(async (req, res, next) => {
+const resetPassword = catchAsyncError(async (req, res, next) => {
     // Extract new password and OTP code from request body
-    const { newPassword, otpCode } = req.body;
+    const { newPassword } = req.body;
+    const hashedToken = cryptography.encryptSync(req.params.token);
+    const user = await userModel.findOne({
+        passwordVerificationToken: hashedToken
+        , passwordVerificationTokenExpiersAt: {
+            $gt: Date.now()
+        }
+    });
+    // If user not found or expired, send error response
+    if (!user) return next(new AppError('Invalid token or expired token', 401));
 
-    // Find the OTP record associated with the user ID
-    let userOtp = await OtpVerificationModel.findOne({ userId: req.params.userId })
-
-    const date = new Date().getTime();
-    const dateOtp = new Date(userOtp?.expiredAt).getTime();
-    // Check if the OTP code is valid and not expired
-    if (date < dateOtp || otpCode !== userOtp.otpCode.toString()) {
-        // If OTP code is invalid or expired, send error response
-        return next(new AppError('Code is not correct or has expired. Please sign up again.', 404))
-    }
-
-    // Delete all OTP records for this user (cleanup)
-    await OtpVerificationModel.deleteMany({ userId: req.params.userId });
-
-    // Find the user associated with the provided user ID
-    let user = await userModel.findById(req.params.userId);
-
-    // Update user's password
-    await userModel.findOneAndUpdate({ _id: req.params.userId }, { password: newPassword, PasswordChangeDate: Date.now() });
+    user.passwordVerificationToken = undefined;
+    user.passwordVerificationTokenExpiersAt = undefined;
+    user.password = newPassword;
+    user.PasswordChangeDate = new Date();
+    await user.save();
 
     // Send success response
     res.status(200).json({
@@ -235,40 +190,36 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
 })
 
 
-export const protectedRouts = catchAsyncError(async (req, res, next) => {
-    // Extract token from request headers
-    let { token } = req.headers;
-
-    // If token is not provided, send error response
-    if (!token) return next(new AppError('Token not provided', 401));
-
-    // Verify JWT token
-    let decoded = await Jwt.verify(token, process.env.SECRET_CODE);
-
-    // Find user by decoded user ID from token
-    let user = await userModel.findById(decoded.userId);
-
-    // If user is not found, send error response
-    if (!user) return next(new AppError('Token is not valid', 401));
-
-    // Check if user's password has been changed after the token was issued
-    if (user?.PasswordChangeDate) {
-        let changePasswordDate = parseInt(user.PasswordChangeDate.getTime() / 1000);
-        if (changePasswordDate > decoded.iat) return next(new AppError('Token is not valid', 401));
+const protectedRouts = catchAsyncError(async (req, res, next) => {
+    // 1- check if token found in header or not 
+    let token = undefined;
+    if (!req.headers.authorization && !req.headers.authorization?.startsWith('Bearer ')) {
+        return next(new AppError('You are not logged in! Please log in to get access.', 401));
     }
+    token = req.headers.authorization.split(' ')[1];
+    //3- decode token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    //4- check if user exist or not
+    const currentUser = await userModel.findById(decoded.id);
+    if (!currentUser) {
+        return next(new AppError('The user belonging to this token does no longer exist.', 401));
+    }
+    //5- check if token is valid token or expired
 
-    // Set user information in request object for further processing
-    req.user = user;
+    if (currentUser.changePasswordAfter(decoded.iat)) {
+        return next(new AppError('User recently changed password! Please log in again.', 401));
+    }
+    //6- grant access to protected route
+    req.user = currentUser;
     next();
-})
+});
 
-// Middleware to check if user is allowed to access specific routes based on roles
-export const allowedTo = (...roles) => {
+const allowedTo = (...roles) => {
     return catchAsyncError(async (req, res, next) => {
-        // Check if user's role is included in allowed roles
-        if (!roles.includes(req.user.role))
-            return next(new AppError('You are not authorized to access this route', 403));
-        next()
+        if (!roles.includes(req.user.role)) {
+            return next(new AppError('you are not allowed to access this route', 403));
+        }
+        next();
     })
 }
 
@@ -277,14 +228,30 @@ export const allowedTo = (...roles) => {
 /****************************************sign with google**************************************** */
 
 
-export const handleGoogleLogin = catchAsyncError(async (req, res, next) => {
+const handleGoogleLogin = catchAsyncError(async (req, res, next) => {
     // Assuming your strategy attaches the JWT to the user object
     if (req.user && req.user.token) {
         // Redirect the user or send the token directly
         // Example: Redirect with the token in query params
         res.redirect(`your-success-page/token=${req.user.token}`);
+        res.status(200).json({
+            status: 'success',
+            message: 'signed in successfully',
+            token
+        })
+
     } else {
         res.redirect('login?error=authenticationFailed');
     }
 })
 
+export {
+    handleGoogleLogin,
+    protectedRouts,
+    resetPassword,
+    forgetPassword,
+    signIn,
+    verifyEmail,
+    signUp,
+    allowedTo
+}

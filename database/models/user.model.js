@@ -2,6 +2,8 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import 'dotenv/config';
+import cryptography from "cryptography";
+import * as crypto from 'crypto';
 
 const userSchema = mongoose.Schema(
   {
@@ -23,7 +25,7 @@ const userSchema = mongoose.Schema(
       type: String,
       trim: true,
       minLength: [8, "too short"],
-      maxLength: [100, "too long"]
+      maxLength: [100, "too long"],
     },
     PasswordChangeDate: Date,
     phone: {
@@ -48,6 +50,8 @@ const userSchema = mongoose.Schema(
       city: String,
       phone: String,
     }],
+    passwordVerificationToken: String,
+    passwordVerificationTokenExpiersAt: Date,
     googleId: String
   },
   { timestamps: true }
@@ -71,5 +75,13 @@ userSchema.methods.correctPassword = function (candidatePassword, userPassword) 
 userSchema.post('init', (doc) => {
   doc.profilImg = process.env.BASE_URL + '/user/' + doc.profilImg;
 })
+
+userSchema.methods.createVerficationToken = function () {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  this.passwordVerificationToken = cryptography.encryptSync(resetToken);
+  this.passwordVerificationTokenExpiersAt = Date.now() + 3 * 60 * 60 * 1000;
+  return resetToken;
+}
+
 
 export const userModel = mongoose.model("user", userSchema);

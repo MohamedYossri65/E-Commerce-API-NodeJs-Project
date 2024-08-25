@@ -1,118 +1,64 @@
-export function htmlUserEmailTemplet(otp, name) {
-    return `<!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-      <title>Static Template</title>
-  
-      <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
-        rel="stylesheet"
-      />
-    </head>
-    <body
-      style="
-        margin: 0;
+export function htmlUserEmailTemplet(resetURL, name) {
+  return `
+  <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Verification</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
         font-family: 'Poppins', sans-serif;
-        background: #ffffff;
-        font-size: 14px;
-      "
-    >
-      <div
-        style="
-          max-width: 680px;
-          margin: 0 auto;
-          padding: 45px 30px 60px;
-          background: #f4f7ff;
-          background-image: url(https://archisketch-resources.s3.ap-northeast-2.amazonaws.com/vrstyler/1661497957196_595865/email-template-background-banner);
-          background-repeat: no-repeat;
-          background-size: 800px 452px;
-          background-position: top center;
-          background-attachment: fixed;
-          background-size: cover; 
-          font-size: 14px;
-          color: #434343;
-        "
-      >
-        <header>
-          <table style="width: 100%">
-            <tbody>
-            </tbody>
-          </table>
-        </header>
-  
-        <main>
-          <div
-            style="
-              margin: 0;
-              margin-top: 70px;
-              padding: 92px 30px 115px;
-              background: #ffffff;
-              border-radius: 30px;
-              text-align: center;
-            "
-          >
-            <div style="width: 100%; max-width: 489px; margin: 0 auto">
-              <h1
-                style="
-                  margin: 0;
-                  font-size: 24px;
-                  font-weight: 500;
-                  color: #1f1f1f;
-                "
-              >
-                Your OTP
-              </h1>
-              <p
-                style="
-                  margin: 0;
-                  margin-top: 17px;
-                  font-size: 16px;
-                  font-weight: 500;
-                "
-              >
-                Hey ${name},
-              </p>
-              <p
-                style="
-                  margin: 0;
-                  margin-top: 17px;
-                  font-weight: 500;
-                  letter-spacing: 0.56px;
-                "
-              >
-                Thank you for choosing us
-              </p>
-              <p
-                style="
-                  margin: 0;
-                  margin-top: 60px;
-                  font-size: 40px;
-                  font-weight: 600;
-                  letter-spacing: 25px;
-                  color: #ba3d4f;
-                "
-              >
-                ${otp}
-              </p>
-            </div>
-          </div>
-  
-          <p
-            style="
-              max-width: 400px;
-              margin: 0 auto;
-              margin-top: 90px;
-              text-align: center;
-              font-weight: 500;
-              color: #8c8c8c;
-            "
-          </p>
-        </main>
-      </div>
-    </body>
-  </html>
+        background-color: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .container {
+        text-align: center;
+        background-color: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        font-weight: 500;
+        margin-bottom: 1rem;
+      }
+      p {
+        font-weight: 300;
+        margin-bottom: 2rem;
+      }
+      button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Email Verification</h2>
+      <p>Please click the link below to verify your email address.</p>
+      <p>${resetURL}</p>
+
+    </div>
+  </body>
+</html>
+
     `
 }
