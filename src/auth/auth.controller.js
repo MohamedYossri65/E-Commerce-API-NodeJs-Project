@@ -3,7 +3,6 @@ import { userModel } from "../../database/models/user.model.js";
 import { catchAsyncError } from "../middleware/catchAsyncError.js";
 import { AppError } from "../utils/AppError.js";
 import nodemailer from "nodemailer"
-import { OtpVerificationModel } from "../../database/models/otpUser.model.js";
 import { htmlUserEmailTemplet } from "./user.email.js";
 import cryptography from "cryptography";
 
@@ -117,7 +116,12 @@ const signIn = catchAsyncError(async (req, res, next) => {
     if (!isFound.isVerified) return next(new AppError('Please verify your email before signing in', 401));
 
     // Generate JWT token for authentication
-    let token = Jwt.sign({ name: isFound.name, userId: isFound._id, role: isFound.role }, process.env.SECRET_CODE);
+    let token = Jwt.sign({
+        name: isFound.name,
+        userId: isFound._id,
+        role: isFound.role
+    },
+        process.env.JWT_SECRET_KEY);
 
     // Send success response with token
     // Send success response
