@@ -198,7 +198,7 @@ const protectedRouts = catchAsyncError(async (req, res, next) => {
     }
     token = req.headers.authorization.split(' ')[1];
     //3- decode token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    const decoded = Jwt.verify(token, process.env.JWT_SECRET_KEY);
     //4- check if user exist or not
     const currentUser = await userModel.findById(decoded.id);
     if (!currentUser) {
