@@ -56,10 +56,10 @@ export const getOne = (model, document) => {
 export const updateOne = (model, document) => {
     return catchAsyncError(async (req, res, next) => {
         let { id } = req.params;
-        if (document == 'category') {
-            req.body.img = req.file.filename;
+        if (document === 'category') {
+            req.body.img = req.file?.filename;
         } else {
-            req.body.logo = req.file.filename;
+            req.body.logo = req.file?.filename;
         }
         req.body.slug = slugify(req.body.name);
         let result = await model.findByIdAndUpdate(id, req.body, { new: true });

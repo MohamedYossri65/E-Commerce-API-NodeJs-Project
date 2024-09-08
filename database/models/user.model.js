@@ -71,17 +71,24 @@ userSchema.methods.correctPassword = function (candidatePassword, userPassword) 
   // Compare the candidate password with the stored password
   return bcrypt.compareSync(candidatePassword, userPassword);
 }
-
 userSchema.post('init', (doc) => {
   doc.profilImg = process.env.BASE_URL + '/user/' + doc.profilImg;
-})
-
+});
 userSchema.methods.createVerficationToken = function () {
   const resetToken = crypto.randomBytes(32).toString('hex');
   this.passwordVerificationToken = cryptography.encryptSync(resetToken);
   this.passwordVerificationTokenExpiersAt = Date.now() + 3 * 60 * 60 * 1000;
   return resetToken;
 }
-
+userSchema.methods.changePasswordAfter = function (tokenStartAt) {
+  // If passwordUpdatedAt exists, compare it to tokenStartAt
+  if (this.passwordUpdatedAt) {
+    // Convert passwordUpdatedAt to seconds and compare with tokenStartAt
+    let passwordUpdatedAtInSeconds = this.passwordUpdatedAt.getTime() / 1000;
+    return passwordUpdatedAtInSeconds > tokenStartAt;
+  }
+  // If passwordUpdatedAt does not exist, return false
+  return false;
+}
 
 export const userModel = mongoose.model("user", userSchema);

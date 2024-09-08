@@ -1,0 +1,265 @@
+[
+  {
+    "departurePoint": {
+      "ar": "الفشن",
+      "en": "Elfashn"
+    },
+    "destination": {
+      "ar": "بني سويف",
+      "en": "Benisuef"
+    },
+    "departureTime": "03:00 AM",
+    "arrivalTime": "04:00 PM",
+    "seatsAvailable": 33,
+    "price": 20,
+    "tripStatus": "going",
+    "standingPoints": [],
+    "bookingStatus": "open",
+    "bookedSeats": 0,
+    "totalRevenue": 0,
+    "dateOfTrip": "2024-08-25T00:00:00.000Z",
+    "realSubscribers": 0,
+    "subscriptions": 0,
+    "isPosted": true
+  },
+  {
+    "departurePoint": {
+      "ar": "الفشن",
+      "en": "Elfashn"
+    },
+    "destination": {
+      "ar": "بني سويف",
+      "en": "Benisuef"
+    },
+    "departureTime": "05:30 PM",
+    "arrivalTime": "10:30 AM",
+    "seatsAvailable": 33,
+    "price": 50,
+    "tripStatus": "going",
+    "standingPoints": [
+      {
+        "point": {
+          "ar": "محطة شمال الفشن",
+          "en": "North Elfashn Station"
+        },
+        "arrivalTime": "04:32 AM",
+        "bookedSeats": 0
+      },
+      {
+        "point": {
+          "ar": "محطة جنوب بني سويف",
+          "en": "South Benisuef Station"
+        },
+        "arrivalTime": "05:40 AM",
+        "bookedSeats": 0
+      }
+    ],
+    "bookingStatus": "close",
+    "bookedSeats": 0,
+    "totalRevenue": 300,
+    "dateOfTrip": "2024-08-24T00:00:00.000Z",
+    "realSubscribers": 0,
+    "subscriptions": 0,
+    "isPosted": true
+  },
+  {
+    "departurePoint": {
+      "ar": "الفشن",
+      "en": "Elfashn"
+    },
+    "destination": {
+      "ar": "بني سويف",
+      "en": "Benisuef"
+    },
+    "departureTime": "04:28 AM",
+    "arrivalTime": "10:00 PM",
+    "seatsAvailable": 33,
+    "price": 50,
+    "tripStatus": "going",
+    "standingPoints": [
+      {
+        "point": {
+          "ar": "محطة شمال الفشن",
+          "en": "North Elfashn Station"
+        },
+        "arrivalTime": "04:32 AM",
+        "bookedSeats": 0
+      },
+      {
+        "point": {
+          "ar": "محطة جنوب بني سويف",
+          "en": "South Benisuef Station"
+        },
+        "arrivalTime": "05:40 AM",
+        "bookedSeats": 0
+      }
+    ],
+    "bookingStatus": "open",
+    "bookedSeats": 0,
+    "totalRevenue": 50,
+    "dateOfTrip": "2024-08-22T00:00:00.000Z",
+    "realSubscribers": 0,
+    "subscriptions": 0,
+    "isPosted": true
+  },
+  {
+    "departurePoint": {
+      "ar": "الفشن",
+      "en": "Elfashn"
+    },
+    "destination": {
+      "ar": "بني سويف",
+      "en": "Benisuef"
+    },
+    "departureTime": "04:28 AM",
+    "arrivalTime": "10:00 PM",
+    "seatsAvailable": 33,
+    "price": 50,
+    "tripStatus": "going",
+    "standingPoints": [
+      {
+        "point": {
+          "ar": "محطة شمال الفشن",
+          "en": "North Elfashn Station"
+        },
+        "arrivalTime": "04:32 AM",
+        "bookedSeats": 0
+      },
+      {
+        "point": {
+          "ar": "محطة جنوب بني سويف",
+          "en": "South Benisuef Station"
+        },
+        "arrivalTime": "05:40 AM",
+        "bookedSeats": 0
+      }
+    ],
+    "bookingStatus": "open",
+    "bookedSeats": 0,
+    "totalRevenue": 50,
+    "dateOfTrip": "2024-08-22T00:00:00.000Z",
+    "realSubscribers": 0,
+    "subscriptions": 0,
+    "isPosted": true
+  },
+  {
+    "departurePoint": {
+      "ar": "الفشن",
+      "en": "Elfashn"
+    },
+    "destination": {
+      "ar": "بني سويف",
+      "en": "Benisuef"
+    },
+    "departureTime": "04:28 AM",
+    "arrivalTime": "10:00 PM",
+    "seatsAvailable": 33,
+    "price": 50,
+    "tripStatus": "going",
+    "standingPoints": [
+      {
+        "point": {
+          "ar": "محطة شمال الفشن",
+          "en": "North Elfashn Station"
+        },
+        "arrivalTime": "04:32 AM",
+        "bookedSeats": 0
+      },
+      {
+        "point": {
+          "ar": "محطة جنوب بني سويف",
+          "en": "South Benisuef Station"
+        },
+        "arrivalTime": "05:40 AM",
+        "bookedSeats": 0
+      }
+    ],
+    "bookingStatus": "open",
+    "bookedSeats": 0,
+    "totalRevenue": 0,
+    "dateOfTrip": "2024-08-25T00:00:00.000Z",
+    "realSubscribers": 0,
+    "subscriptions": 0,
+    "isPosted": true
+  },
+  {
+    "departurePoint": {
+      "ar": "الفشن",
+      "en": "Elfashn"
+    },
+    "destination": {
+      "ar": "بني سويف",
+      "en": "Benisuef"
+    },
+    "departureTime": "04:28 AM",
+    "arrivalTime": "10:00 PM",
+    "seatsAvailable": 33,
+    "price": 50,
+    "tripStatus": "going",
+    "standingPoints": [
+      {
+        "point": {
+          "ar": "محطة شمال الفشن",
+          "en": "North Elfashn Station"
+        },
+        "arrivalTime": "04:32 AM",
+        "bookedSeats": 0
+      },
+      {
+        "point": {
+          "ar": "محطة جنوب بني سويف",
+          "en": "South Benisuef Station"
+        },
+        "arrivalTime": "05:40 AM",
+        "bookedSeats": 0
+      }
+    ],
+    "bookingStatus": "open",
+    "bookedSeats": 0,
+    "totalRevenue": 0,
+    "dateOfTrip": "2024-08-25T00:00:00.000Z",
+    "realSubscribers": 0,
+    "subscriptions": 0,
+    "isPosted": true
+  },
+  {
+    "departurePoint": {
+      "ar": "الفشن",
+      "en": "Elfashn"
+    },
+    "destination": {
+      "ar": "بني سويف",
+      "en": "Benisuef"
+    },
+    "departureTime": "04:28 AM",
+    "arrivalTime": "10:00 PM",
+    "seatsAvailable": 33,
+    "price": 50,
+    "tripStatus": "going",
+    "standingPoints": [
+      {
+        "point": {
+          "ar": "محطة شمال الفشن",
+          "en": "North Elfashn Station"
+        },
+        "arrivalTime": "04:32 AM",
+        "bookedSeats": 0
+      },
+      {
+        "point": {
+          "ar": "محطة جنوب بني سويف",
+          "en": "South Benisuef Station"
+        },
+        "arrivalTime": "05:40 AM",
+        "bookedSeats": 0
+      }
+    ],
+    "bookingStatus": "open",
+    "bookedSeats": 0,
+    "totalRevenue": 0,
+    "dateOfTrip": "2024-08-25T00:00:00.000Z",
+    "realSubscribers": 0,
+    "subscriptions": 0,
+    "isPosted": true
+  }
+]

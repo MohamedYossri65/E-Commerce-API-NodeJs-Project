@@ -12,7 +12,6 @@ const categorySchema = mongoose.Schema(
     },
     img: {
       type: String,
-      // required: [true, "the name is requierd"],
       trim: true,
     },
     slug: {
@@ -23,8 +22,12 @@ const categorySchema = mongoose.Schema(
   },
   { timestamps: true }
 );
-categorySchema.post('init' ,(doc)=>{
-  doc.img = process.env.BASE_URL +'/category/'+doc.img;
+
+categorySchema.pre('save', function () {
+  if (this.img) {
+    this.img = process.env.BASE_URL + '/category/' + this.img;
+  }
+
 })
 
 export const categoryModel = mongoose.model("category", categorySchema);

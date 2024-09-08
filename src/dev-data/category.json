@@ -1,0 +1,27 @@
+[
+  {
+    "name": "Fast Food",
+    "img": "fast-food.jpg",
+    "slug": "fast-food"
+  },
+  {
+    "name": "Italian Cuisine",
+    "img": "italian-cuisine.jpg",
+    "slug": "italian-cuisine"
+  },
+  {
+    "name": "Desserts",
+    "img": "desserts.jpg",
+    "slug": "desserts"
+  },
+  {
+    "name": "Beverages",
+    "img": "beverages.jpg",
+    "slug": "beverages"
+  },
+  {
+    "name": "Vegan",
+    "img": "vegan.jpg",
+    "slug": "vegan"
+  }
+]
